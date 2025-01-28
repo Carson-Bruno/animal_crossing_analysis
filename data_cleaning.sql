@@ -9,7 +9,10 @@ ALTER TABLE ceiling_decor DROP COLUMN image;
 ALTER TABLE rugs DROP COLUMN image;
 ALTER TABLE wall_mounted DROP COLUMN image;
 ALTER TABLE wallpaper DROP COLUMN image;
-
+ALTER TABLE villagers 
+DROP COLUMN icon,
+DROP COLUMN photo,
+DROP COLUMN house;
 ---next let's convert values coded as 'NA','None',or 'NFS' to null
 SELECT * FROM ceiling_decor LIMIT 20;
 

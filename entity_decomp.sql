@@ -14,34 +14,41 @@ CREATE TABLE villager_furniture AS
 (
 WITH other_furniture AS
 (
-SELECT w.internal_id as villager_wall,
+SELECT CAST(w.internal_id as TEXT) as villager_wall,
 v.name,SPLIT_PART(v.diy_workbench,',',1) as work,
 SPLIT_PART(v.kitchen_equipment,',',1) as kitchen,
-f.internal_id as floor_id,furniture_list
+CAST(f.internal_id as TEXT) as floor_id,
+regexp_split_to_table(furniture_list,';')as furniture
 FROM villagers v 
 JOIN wallpaper w 
 ON v.wallpaper = w.name
 JOIN floors f 
 ON f.name = v.flooring
-),
-
-all_furniture as 
-(SELECT name, 
-CONCAT(work,';',kitchen,';',villager_wall,';',floor_id,';',furniture_list) as all_list
-FROM other_furniture 
-ORDER BY name),
-
-villager_furniture AS 
-(SELECT name, regexp_split_to_table(all_list,';') as furniture
-FROM all_furniture),
-
-row_number AS (
-    SELECT *, ROW_NUMBER() OVER(PARTITION BY name, furniture ORDER BY name, furniture) AS RN
-    FROM villager_furniture
 )
 
-SELECT name,furniture FROM row_number 
-WHERE RN=1);
+SELECT name, 
+UNNEST(ARRAY[work,kitchen,villager_wall,floor_id,furniture]) as furniture_id
+FROM other_furniture 
+GROUP BY name,furniture_id
+ORDER BY name);
+
+---add constraints
+ALTER TABLE villager_furniture
+ADD PRIMARY KEY(name,furniture);
+
+ALTER TABLE villager_furniture
+ADD FOREIGN KEY (name) REFERENCES villagers(name);
+
+
+---drop furniture items from the villagers table
+ALTER TABLE villagers
+DROP COLUMN furniture_list,
+DROP COLUMN wallpaper,
+DROP COLUMN flooring,
+DROP COLUMN furniture_name_list,
+DROP COLUMN diy_workbench,
+DROP COLUMN kitchen_equipment;
+
 
 
 ---create furniture items table
@@ -49,7 +56,13 @@ WHERE RN=1);
 ---since furniture items from tables such as housewares and wall_mounted can
 ---contain multiple variations with the same unique id and price,
 ---we will create a table with unique ids for all items and their associates price
---- from all of our tables containing furniture
+---from all of our tables containing furniture
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 
-DROP TABLE IF EXISTS villagers;
+DROP TABLE IF EXISTS villagers CASCADE;
 CREATE TABLE villagers(
 name TEXT,
 icon TEXT,
@@ -315,3 +315,27 @@ internal_id INT,
 unique_entry_id VARCHAR(30)
 )
 
+---update: adding primary and foreign keys
+ALTER TABLE villagers 
+ADD PRIMARY KEY(name);
+
+ALTER TABLE ceiling_decor
+ADD PRIMARY KEY(internal_id,variant_id);
+
+ALTER TABLE floors
+ADD PRIMARY KEY(internal_id);
+
+ALTER TABLE housewares
+ADD PRIMARY KEY(internal_id,variant_id);
+
+ALTER TABLE miscellaneous
+ADD PRIMARY KEY(internal_id,variant_id);
+
+ALTER TABLE rugs
+ADD PRIMARY KEY(internal_id);
+
+ALTER TABLE wall_mounted
+ADD PRIMARY KEY(internal_id,variant_id);
+
+ALTER TABLE wallpaper
+ADD PRIMARY KEY(internal_id);
