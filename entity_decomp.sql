@@ -58,8 +58,19 @@ DROP COLUMN kitchen_equipment;
 ---we will create a table with unique ids for all items and their associates price
 ---from all of our tables containing furniture
 
-
-
+DROP TABLE IF EXISTS all_furniture;
+CREATE TABLE all_furniture 
+(internal_id INT PRIMARY KEY,
+name TEXT,
+diy TEXT,
+buy INT,
+sell INT,
+size TEXT,
+surface TEXT,
+interact TEXT,
+tag TEXT,
+version_added TEXT
+);
 
 
 
