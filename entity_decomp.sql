@@ -54,26 +54,95 @@ DROP COLUMN kitchen_equipment;
 ---create furniture items table
 
 ---since furniture items from tables such as housewares and wall_mounted can
----contain multiple variations with the same unique id and price,
----we will create a table with unique ids for all items and their associates price
+---contain multiple variations with the same unique id
+---we will create a table with unique ids for all items and their characteristics
 ---from all of our tables containing furniture
 
 DROP TABLE IF EXISTS all_furniture;
-CREATE TABLE all_furniture 
-(internal_id INT PRIMARY KEY,
-name TEXT,
-diy TEXT,
-buy INT,
-sell INT,
-size TEXT,
-surface TEXT,
-interact TEXT,
-tag TEXT,
-version_added TEXT
+CREATE TABLE all_furniture AS
+(SELECT DISTINCT(internal_id), 
+name,diy, buy,sell, tag,source,season_even as season_event,version_added,exchange_price,exchange_currency,
+'housewares' as type_furniture
+FROM housewares h
+UNION ALL 
+SELECT DISTINCT(internal_id), 
+name,diy, buy,sell, tag,source,season_event,version_added,exchange_price,exchange_currency,
+'miscellaneous' as type_furniture
+FROM miscellaneous
+UNION ALL
+SELECT DISTINCT(internal_id), 
+name,diy, buy,sell, tag,source,season_event,version_added,exchange_price,exchange_currency,
+'wall_mounted' as type_furniture
+FROM wall_mounted
+UNION ALL
+SELECT DISTINCT(internal_id), 
+name,diy, buy,sell, tag,source,season_event,version_added,exchange_price,exchange_currency,
+'wallpaper' as type_furniture
+FROM wallpaper
+UNION ALL
+SELECT DISTINCT(internal_id), 
+name,diy, buy,sell,tag,source,season_event,version_added,exchange_price,exchange_currency,
+'rugs' as type_furniture
+FROM rugs
+UNION ALL
+SELECT DISTINCT(internal_id), 
+name,diy, buy,sell,tag,source,season_event,version_added,exchange_price,exchange_currency,
+'floors' as type_furniture
+FROM floors
+UNION ALL
+SELECT DISTINCT(internal_id), 
+name,diy, buy,sell, tag,source,season_event,version_added,exchange_price,exchange_currency,
+'ceiling_decor' as type_furniture
+FROM ceiling_decor
 );
 
+--- deal with nfs and na values 
+UPDATE all_furniture
+SET
+	buy = NULLIF(buy,'NFS'),
+	season_event = NULLIF(season_event,'NA'),
+	exchange_price = NULLIF(exchange_price,'NA'),
+	exchange_currency = NULLIF(exchange_currency,'NA');
+SELECT * FROM all_furniture LIMIT 20;
 
+--- Create a table with hha information for all furniture
+DROP TABLE IF EXISTS hha_info;
+CREATE TABLE hha_info AS
+(SELECT DISTINCT(internal_id), hha_base, hha_concept_1,hha_concept_2, hha_series,hha_set,hha_category
+FROM housewares h
+UNION ALL 
+SELECT DISTINCT(internal_id), hha_base, hha_concept_1,hha_concept_2, hha_series,hha_set,hha_category
+FROM miscellaneous
+UNION ALL
+SELECT DISTINCT(internal_id), hha_base, hha_concept_1,hha_concept_2, hha_series,hha_set,hha_category
+FROM wall_mounted
+UNION ALL
+SELECT DISTINCT(internal_id), hha_base, hha_concept_1,hha_concept_2, hha_series,'None' as hha_set,'None' as hha_category
+FROM wallpaper
+UNION ALL
+SELECT DISTINCT(internal_id), hha_base, hha_concept_1,hha_concept_2, hha_series,'None' as hha_set,'None' as hha_category
+FROM rugs
+UNION ALL
+SELECT DISTINCT(internal_id), hha_base, hha_concept_1,hha_concept_2, hha_series,'None' as hha_set,'None' as hha_category
+FROM floors
+UNION ALL
+SELECT DISTINCT(internal_id), hha_base, hha_concept_1,hha_concept_2, hha_series,hha_set,hha_category
+FROM ceiling_decor
+)
+--- deal with none values 
+UPDATE hha_info 
+SET 
+    hha_concept_2 = NULLIF(hha_concept_2, 'None'),
+    hha_series = NULLIF(hha_series, 'None'),
+    hha_set = NULLIF(hha_set, 'None'),
+    hha_category = NULLIF(hha_category, 'None');
 
+SELECT * FROM hha_info LIMIT 5;
+
+---TO-DO
+-----create constraints on tables 
+-----create variation tables from original furniture tables
+-----create masterlist and variations for clothing
 
 
 
